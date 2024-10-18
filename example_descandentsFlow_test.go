@@ -1,9 +1,11 @@
 package dag_test
 
 import (
+	"context"
 	"fmt"
-	"github.com/heimdalr/dag"
 	"sort"
+
+	"github.com/ishumei/dag"
 )
 
 func ExampleDAG_DescendantsFlow() {
@@ -33,7 +35,7 @@ func ExampleDAG_DescendantsFlow() {
 	//   4
 
 	// The callback function adds its own value (ID) to the sum of parent results.
-	flowCallback := func(d *dag.DAG, id string, parentResults []dag.FlowResult) (interface{}, error) {
+	flowCallback := func(ctx context.Context, d *dag.DAG, id string, parentResults []dag.FlowResult) (interface{}, error) {
 
 		v, _ := d.GetVertex(id)
 		result, _ := v.(int)
@@ -48,7 +50,7 @@ func ExampleDAG_DescendantsFlow() {
 		return result, nil
 	}
 
-	_, _ = d.DescendantsFlow(v0, nil, flowCallback)
+	_, _ = d.DescendantsFlow(context.Background(), v0, nil, flowCallback)
 
 	// Unordered output:
 	// 0 based on: [] returns: 0

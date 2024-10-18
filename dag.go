@@ -2,6 +2,7 @@
 package dag
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -908,13 +909,13 @@ type FlowResult struct {
 // work. The parameters of the function are the (complete) DAG, the current
 // vertex ID, and the results of all its parents. An instance of FlowCallback
 // should return a result or an error.
-type FlowCallback func(d *DAG, id string, parentResults []FlowResult) (interface{}, error)
+type FlowCallback func(ctx context.Context, d *DAG, id string, parentResults []FlowResult) (interface{}, error)
 
 // DescendantsFlow traverses descendants of the vertex with the ID startID. For
 // the vertex itself and each of its descendant it executes the given (callback-)
 // function providing it the results of its respective parents. The (callback-)
 // function is only executed after all parents have finished their work.
-func (d *DAG) DescendantsFlow(startID string, inputs []FlowResult, callback FlowCallback) ([]FlowResult, error) {
+func (d *DAG) DescendantsFlow(ctx context.Context, startID string, inputs []FlowResult, callback FlowCallback) ([]FlowResult, error) {
 	d.muDAG.RLock()
 	defer d.muDAG.RUnlock()
 
@@ -980,7 +981,7 @@ func (d *DAG) DescendantsFlow(startID string, inputs []FlowResult, callback Flow
 		// Remember to wait for this goroutine.
 		wg.Add(1)
 
-		go func(id string) {
+		go func(ctx context.Context, id string) {
 
 			// Get this vertex's input channel.
 			// Note, only concurrent read here, which is fine.
@@ -994,7 +995,7 @@ func (d *DAG) DescendantsFlow(startID string, inputs []FlowResult, callback Flow
 			}
 
 			// Execute the worker.
-			result, errWorker := callback(d, id, parentResults)
+			result, errWorker := callback(ctx, d, id, parentResults)
 
 			// Wrap the worker's result into a FlowResult.
 			flowResult := FlowResult{
@@ -1016,7 +1017,7 @@ func (d *DAG) DescendantsFlow(startID string, inputs []FlowResult, callback Flow
 			// "Sign off".
 			wg.Done()
 
-		}(id)
+		}(ctx, id)
 	}
 
 	// Wait for all go routines to finish.
