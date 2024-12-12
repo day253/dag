@@ -1,4 +1,4 @@
-module github.com/ishumei/dag
+module github.com/day253/dag
 
 go 1.12
 

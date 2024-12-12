@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/ishumei/dag"
+	"github.com/day253/dag"
 )
 
 type largeVertex struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/ishumei/dag"
+	"github.com/day253/dag"
 )
 
 func ExampleDAG_DescendantsFlow() {
